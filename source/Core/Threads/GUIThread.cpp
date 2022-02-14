@@ -896,7 +896,7 @@ void startGUITask(void const *argument) {
     case BUTTON_NONE:
       // Do nothing
       break;
-    case BUTTON_BOTH:
+    case BUTTON_B_SHORT:
       // Not used yet
       // In multi-language this might be used to reset language on a long hold
       // or some such
@@ -906,17 +906,18 @@ void startGUITask(void const *argument) {
       // Show the version information
       showDebugMenu();
       break;
-    case BUTTON_B_LONG:
+    case BUTTON_BOTH:
       gui_solderingTempAdjust();
       saveSettings();
       break;
+    case BUTTON_F_LONG:
     case BUTTON_F_SHORT:
       if (!isTipDisconnected()) {
         gui_solderingMode(0); // enter soldering mode
         buttonLockout = true;
       }
       break;
-    case BUTTON_F_LONG:
+    case BUTTON_B_LONG:
       enterSettingsMenu(); // enter the settings menu
       {
         OLED::useSecondaryFramebuffer(true);
