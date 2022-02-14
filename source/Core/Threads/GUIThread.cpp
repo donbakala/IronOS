@@ -564,15 +564,6 @@ static void gui_solderingMode(uint8_t jumpToSleep) {
       }
 #endif
 
-      if (boostModeOn) {
-        if (OLED::getRotation()) {
-          OLED::setCursor(38, 8);
-        } else {
-          OLED::setCursor(55, 8);
-        }
-        OLED::print(SymbolPlus, FontStyle::SMALL);
-      }
-
       if (OLED::getRotation()) {
         OLED::setCursor(0, 0);
       } else {
