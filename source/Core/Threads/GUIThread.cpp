@@ -550,6 +550,7 @@ static void gui_solderingMode(uint8_t jumpToSleep) {
       } else {
         OLED::setCursor(-1, 0);
       }
+      if (!(boostModeOn && (xTaskGetTickCount() % 300 < 125)))
       gui_drawTipTemp(true, FontStyle::LARGE);
 
 #ifndef NO_SLEEP_MODE
