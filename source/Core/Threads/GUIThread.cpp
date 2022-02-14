@@ -511,8 +511,8 @@ static void gui_solderingMode(uint8_t jumpToSleep) {
         // exit
         return;
         break;
-      case BUTTON_B_LONG:
-        return; // exit on back long hold
+      case BUTTON_B_SHORT:
+        return; // exit on back short press
         break;
       case BUTTON_F_LONG:
         // if boost mode is enabled turn it on
@@ -520,7 +520,8 @@ static void gui_solderingMode(uint8_t jumpToSleep) {
           boostModeOn = true;
         break;
       case BUTTON_F_SHORT:
-      case BUTTON_B_SHORT: {
+        break;
+      case BUTTON_B_LONG: {
         uint16_t oldTemp = getSettingValue(SettingsOptions::SolderingTemp);
         gui_solderingTempAdjust(); // goto adjust temp mode
         if (oldTemp != getSettingValue(SettingsOptions::SolderingTemp)) {
@@ -900,11 +901,11 @@ void startGUITask(void const *argument) {
       // or some such
       break;
 
-    case BUTTON_B_LONG:
+    case BUTTON_BOTH_LONG:
       // Show the version information
       showDebugMenu();
       break;
-    case BUTTON_F_LONG:
+    case BUTTON_B_LONG:
       gui_solderingTempAdjust();
       saveSettings();
       break;
@@ -914,7 +915,7 @@ void startGUITask(void const *argument) {
         buttonLockout = true;
       }
       break;
-    case BUTTON_B_SHORT:
+    case BUTTON_F_LONG:
       enterSettingsMenu(); // enter the settings menu
       {
         OLED::useSecondaryFramebuffer(true);
