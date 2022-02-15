@@ -378,7 +378,7 @@ static int gui_SolderingSleepingMode(bool stayOff, bool autoStarted) {
   return 0;
 }
 #ifndef NO_SLEEP_MODE
-
+#ifdef ENABLE_DISPLAY_COUNTDOWN
 static void display_countdown(int sleepThres) {
   /*
    * Print seconds or minutes (if > 99 seconds) until sleep
@@ -394,6 +394,28 @@ static void display_countdown(int sleepThres) {
     OLED::print(SymbolSeconds, FontStyle::SMALL);
   }
 }
+#endif
+
+static void display_countdown_line(int sleepThres, int16_t x, uint8_t width) {
+    /*
+     * Print line representing time until sleep
+     * mode is triggered.
+     */
+    int        lastEventTime = lastButtonTime < lastMovementTime ? lastMovementTime : lastButtonTime;
+    TickType_t downCount = sleepThres - xTaskGetTickCount() + lastEventTime;
+    uint8_t downCountPercent = ((downCount - 1) / (sleepThres / 16)) + 1;
+
+    union u_type {
+        uint16_t whole;
+        uint8_t  strips[2];
+    } column;
+
+    column.whole = (1 << downCountPercent) - 1;
+    column.whole <<= 16 - downCountPercent;
+    OLED::fillArea(x, 0, width, 8, column.strips[0]);
+    OLED::fillArea(x, 8, width, 8, column.strips[1]);
+}
+
 static uint32_t getSleepTimeout() {
 
   if (getSettingValue(SettingsOptions::Sensitivity) && getSettingValue(SettingsOptions::SleepTime)) {
@@ -553,18 +575,17 @@ static void gui_solderingMode(uint8_t jumpToSleep) {
 #ifndef NO_SLEEP_MODE
       if (getSettingValue(SettingsOptions::Sensitivity) && getSettingValue(SettingsOptions::SleepTime)) {
         if (OLED::getRotation()) {
-          OLED::setCursor(32, 0);
+          display_countdown_line(getSleepTimeout(), 0, 2);
         } else {
-          OLED::setCursor(47, 0);
+          display_countdown_line(getSleepTimeout(), 94, 2);
         }
-        display_countdown(getSleepTimeout());
       }
 #endif
 
       if (OLED::getRotation()) {
-        OLED::setCursor(0, 0);
+        OLED::setCursor(3, 0);
       } else {
-        OLED::setCursor(67, 0);
+        OLED::setCursor(64, 0);
       }
       OLED::printNumber(x10WattHistory.average() / 10, 2, FontStyle::SMALL);
       OLED::print(SymbolDot, FontStyle::SMALL);
@@ -572,9 +593,9 @@ static void gui_solderingMode(uint8_t jumpToSleep) {
       OLED::print(SymbolWatts, FontStyle::SMALL);
 
       if (OLED::getRotation()) {
-        OLED::setCursor(0, 8);
+        OLED::setCursor(3, 8);
       } else {
-        OLED::setCursor(67, 8);
+        OLED::setCursor(64, 8);
       }
       printVoltage();
       OLED::print(SymbolVolts, FontStyle::SMALL);
@@ -974,9 +995,9 @@ void startGUITask(void const *argument) {
           // OFF 300ms ON 700ms
           gui_drawTipTemp(true, FontStyle::LARGE); // draw in the temp
         if (OLED::getRotation()) {
-          OLED::setCursor(6, 0);
+          OLED::setCursor(9, 0);
         } else {
-          OLED::setCursor(73, 0); // top right
+          OLED::setCursor(70, 0); // top right
         }
         OLED::printNumber(getSettingValue(SettingsOptions::SolderingTemp), 3, FontStyle::SMALL); // draw set temp
         if (getSettingValue(SettingsOptions::TemperatureInF))
@@ -984,9 +1005,9 @@ void startGUITask(void const *argument) {
         else
           OLED::print(SymbolDegC, FontStyle::SMALL);
         if (OLED::getRotation()) {
-          OLED::setCursor(0, 8);
+          OLED::setCursor(3, 8);
         } else {
-          OLED::setCursor(67, 8); // bottom right
+          OLED::setCursor(64, 8); // bottom right
         }
         printVoltage(); // draw voltage then symbol (v)
         OLED::print(SymbolVolts, FontStyle::SMALL);
