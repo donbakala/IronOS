@@ -569,7 +569,6 @@ static void gui_solderingMode(uint8_t jumpToSleep) {
       } else {
         OLED::setCursor(-1, 0);
       }
-      if (!(boostModeOn && (xTaskGetTickCount() % 300 < 125)))
       gui_drawTipTemp(true, FontStyle::LARGE);
 
 #ifndef NO_SLEEP_MODE
@@ -599,6 +598,15 @@ static void gui_solderingMode(uint8_t jumpToSleep) {
       }
       printVoltage();
       OLED::print(SymbolVolts, FontStyle::SMALL);
+
+      if (OLED::getRotation()) {
+        OLED::setCursor(37, 0);
+      } else {
+        OLED::setCursor(49, 0);
+      }
+      if (!(boostModeOn && (xTaskGetTickCount() % 300 < 125)))
+      OLED::drawHeatSymbol(X10WattsToPWM(x10WattHistory.average()));
+
     } else {
       OLED::setCursor(0, 0);
       // We switch the layout direction depending on the orientation of the oled
@@ -994,6 +1002,11 @@ void startGUITask(void const *argument) {
           // 1000 tick/sec
           // OFF 300ms ON 700ms
           gui_drawTipTemp(true, FontStyle::LARGE); // draw in the temp
+        if (OLED::getRotation()) {
+          OLED::drawAreaOnlyZeros(50, 0, 36, 16);
+        } else {
+          OLED::drawAreaOnlyZeros(0, 0, 36, 16);
+        }
         if (OLED::getRotation()) {
           OLED::setCursor(9, 0);
         } else {

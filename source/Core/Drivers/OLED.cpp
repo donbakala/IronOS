@@ -510,6 +510,46 @@ void OLED::drawArea(int16_t x, int8_t y, uint8_t wide, uint8_t height, const uin
 }
 
 // Draw an area, but y must be aligned on 0/8 offset
+void OLED::drawAreaOnlyZeros(int16_t x, int8_t y, uint8_t wide, uint8_t height) {
+  // Splat this from x->x+wide in two strides
+  if (x <= -wide)
+    return; // cutoffleft
+  if (x > 96)
+    return; // cutoff right
+
+  uint8_t visibleStart = 0;
+  uint8_t visibleEnd   = wide;
+
+
+  // trimming to draw partials
+  if (x < 0) {
+    visibleStart -= x; // subtract negative value == add absolute value
+  }
+  if (x + wide > 96) {
+    visibleEnd = 96 - x;
+  }
+
+  uint8_t pattern = 0b01010101;
+  if (y == 0) {
+    // Splat first line of data
+    for (uint8_t xx = visibleStart; xx < visibleEnd; xx++) {
+      firstStripPtr[xx + x] &= pattern;
+      pattern = ~pattern;
+      //ptr[xx];
+    }
+  }
+  pattern = 0b01010101;
+  if (y == 8 || height == 16) {
+    // Splat the second line
+    for (uint8_t xx = visibleStart; xx < visibleEnd; xx++) {
+      secondStripPtr[x + xx] &= pattern;
+      pattern = ~pattern;
+      //ptr[xx + (height == 16 ? wide : 0)];
+    }
+  }
+}
+
+// Draw an area, but y must be aligned on 0/8 offset
 // For data which has octets swapped in a 16-bit word.
 void OLED::drawAreaSwapped(int16_t x, int8_t y, uint8_t wide, uint8_t height, const uint8_t *ptr) {
   // Splat this from x->x+wide in two strides
